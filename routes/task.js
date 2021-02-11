@@ -1,18 +1,17 @@
 const router = require('express').Router();
 const Task = require('../models/Task');
-const { post } = require('./auth');
+
 
 router.get('/', async (req, res) => {
-
     try {
-        const tasks = await Task.find({ user: req.user._id })
+        const tasks = await Task.find({ user: req.user._id }).populate('user')
         res.status(200).json({status: 'success', tasks})
     } catch (err) {
         res.status(500).json({status: 'error', error})
     }
 })
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     const task = new Task({
         ...req.body,
         user: req.user._id
@@ -21,12 +20,12 @@ router.post('/', (req, res) => {
     try {
         const newTask = await task.save()
         res.status(201).json({ status: 'success', newTask})
-    } catch (err) {
+    } catch (error) {
         res.json({ status: 'error', error })
     }
 })
 
-router.get('/:taskId', (req, res) => {
+router.get('/:taskId', async (req, res) => {
     try {
         const task = await Task.findById( req.params.taskId)
         res.status(200).json({status: 'success', task})
@@ -35,7 +34,7 @@ router.get('/:taskId', (req, res) => {
     }
 }) 
 
-router.delete('/:taskId', (req, res) => {
+router.delete('/:taskId', async (req, res) => {
     try {
         const deletedTask = await Task.remove({ _id: req.params.taskId})
         res.json({ status: 'success', message: 'Task deleted', data: deletedTask})
@@ -44,16 +43,17 @@ router.delete('/:taskId', (req, res) => {
     }
 })
 
-router.patch('/:taskId', (req, res) => {
+router.patch('/:taskId', async (req, res) => {
     try {
-        const updatedTask = await Task.updateOne(
-            { _id: req.params.postId},
-            {
-                $set: {...req.body}
-            }
+        const updatedTask = await Task.findOneAndUpdate(
+            { _id: req.params.taskId},
+            {...req.body},
+            {new: true}
         )
         res.status(200).json({status: 'success', updatedTask})
     } catch (err) {
         res.json({status: 'error', error})
     }
 })
+
+module.exports = router
