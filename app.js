@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const app = express();
 const user = require('./routes/user');
 const task = require('./routes/task')
-const { auth } = require('./verifyToken')
+const authUser = require('./routes/auth')
+const { verifyToken } = require('./verifyToken')
 require('dotenv/config');
 const cron = require('node-cron');
 
@@ -16,7 +17,7 @@ mongoose.connect(process.env.DB_CONNECT,
     useUnifiedTopology: true,
     useFindAndModify: false
 }).then(() => {
-    console.log('Finally connected');
+    console.log('DB connected');
 },
     err => console.log(err)
 )
@@ -33,7 +34,8 @@ app.use(express.json())
 
 
 // Routes
-app.use(auth)
+app.use('/api/auth', authUser)
+app.use(verifyToken)
 app.use('/api/users', user)
 app.use('/api/tasks', task)
 app.get('/', (req, res) => {
@@ -42,4 +44,7 @@ app.get('/', (req, res) => {
 
 
 // Server
-app.listen(process.env.PORT || '3000')
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`App is running on port ${ PORT }`);
+});
