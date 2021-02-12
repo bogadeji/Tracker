@@ -34,13 +34,14 @@ app.use(express.json())
 
 
 // Routes
+app.get('/', (req, res) => {
+    res.send('E don connect?')
+})
 app.use('/api/auth', authUser)
 app.use(verifyToken)
 app.use('/api/users', user)
 app.use('/api/tasks', task)
-app.get('/', (req, res) => {
-    res.send('E don connect?')
-})
+
 
 
 // Server
